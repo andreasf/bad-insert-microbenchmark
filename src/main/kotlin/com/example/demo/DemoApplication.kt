@@ -32,7 +32,6 @@ class InsertBenchmark(val jdbcTemplate: JdbcTemplate) : CommandLineRunner {
         val duration = System.currentTimeMillis() - start
 
         println("Inserted ${items.size} items in ${duration}ms\n")
-
     }
 
     fun createSchema() {
@@ -59,19 +58,16 @@ class InsertBenchmark(val jdbcTemplate: JdbcTemplate) : CommandLineRunner {
     }
 
     fun insertAll(items: List<Stuff>) {
-        for (fromIndex in 0..items.size step batchSize) {
-            val toIndex = minOf(items.size, fromIndex + batchSize)
-            jdbcTemplate.batchUpdate(
-                    "INSERT INTO stuff (project_id, uri, writable) VALUES (?, ?, ?)",
-                    items.subList(fromIndex, toIndex),
-                    1000,
-                    { ps, item ->
-                        ps.setLong(1, item.projectId)
-                        ps.setString(2, item.uri)
-                        ps.setBoolean(3, item.writable)
-                    }
-            )
-        }
+        jdbcTemplate.batchUpdate(
+                "INSERT INTO stuff (project_id, uri, writable) VALUES (?, ?, ?)",
+                items,
+                batchSize,
+                { ps, item ->
+                    ps.setLong(1, item.projectId)
+                    ps.setString(2, item.uri)
+                    ps.setBoolean(3, item.writable)
+                }
+        )
     }
 }
 
